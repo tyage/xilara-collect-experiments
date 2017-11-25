@@ -20,12 +20,14 @@ const getLatestOpenBugBountyId = () => {
   // TODO: implement
   return 432289;
 };
+const sleep = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
 
 const fetchAllOpenBugBounties = async () => {
   for (let id = getLatestOpenBugBountyId(); id > 0; --id) {
     const filename = `data/openbugbounty/${id}`;
     const body = await fetchOpenBugBounty(id);
     fs.writeFileSync(filename, body);
+    await sleep(1000);
   }
 };
 fetchAllOpenBugBounties();
