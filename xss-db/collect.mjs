@@ -1,6 +1,5 @@
-const https = require('https');
-const fs = require('fs');
-const { fetch, sleep } = require('./lib');
+import fs from 'fs';
+import { fetch, sleep } from './lib';
 
 const fetchOpenBugBounty = (id) => fetch(`https://www.openbugbounty.org/reports/${id}`);
 const getLatestOpenBugBountyId = () => {
@@ -13,7 +12,7 @@ const fetchAllOpenBugBounties = async () => {
     const filename = `data/openbugbounty/${id}`;
     const body = await fetchOpenBugBounty(id);
     fs.writeFileSync(filename, body);
-    await sleep(1000);
+    await sleep(500);
   }
 };
 fetchAllOpenBugBounties();

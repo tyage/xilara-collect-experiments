@@ -1,6 +1,5 @@
-const https = require('https');
-const fs = require('fs');
-const { fetch, sleep } = require('./lib');
+import fs from 'fs';
+import { fetch, sleep } from './lib';
 
 const fetchListPage = (id) => fetch(`https://www.openbugbounty.org/latest/page/${id}`);
 const getLastListPage = () => {

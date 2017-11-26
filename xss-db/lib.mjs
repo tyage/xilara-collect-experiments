@@ -1,3 +1,5 @@
+import https from 'https';
+
 export const fetch = (url) => {
   console.log(`start to fetch ${url}`);
   return new Promise((resolve, reject) => {
