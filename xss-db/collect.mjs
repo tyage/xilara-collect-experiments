@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { fetch, sleep } from './lib';
 
-const fetchOpenBugBounty = (id) => fetch(`https://www.openbugbounty.org/reports/${id}`);
+const fetchOpenBugBounty = (id) => fetch(`https://www.openbugbounty.org/reports/${id}/`);
 const getLatestOpenBugBountyId = () => {
   // TODO: implement
   return 432289;

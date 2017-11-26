@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { fetch, sleep } from './lib';
 
-const fetchListPage = (id) => fetch(`https://www.openbugbounty.org/latest/page/${id}`);
+const fetchListPage = (id) => fetch(`https://www.openbugbounty.org/latest/page/${id}/`);
 const getLastListPage = () => {
   // TODO: implement
   return 4498;
