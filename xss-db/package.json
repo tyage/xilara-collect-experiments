@@ -1,0 +1,14 @@
+{
+  "name": "xss-db",
+  "version": "1.0.0",
+  "description": "## Collect list from page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "htmlparser2": "^3.9.2"
+  }
+}
