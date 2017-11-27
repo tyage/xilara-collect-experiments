@@ -44,7 +44,7 @@ const getReportsFromList = async () => {
   // delete duplicated report
   const idToReport = {};
   reports.forEach(r => idToReport[r.id] = r);
-  reports = Object.entries(idToReport).map((k, v) => v);
+  reports = Object.entries(idToReport).map(([k, v]) => v);
 
   return reports;
 };
