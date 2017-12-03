@@ -1,5 +1,6 @@
 import https from 'https';
 import htmlparser from 'htmlparser2';
+import fs from 'fs';
 
 export const fetch = (url) => {
   console.log(`start to fetch ${url}`);
@@ -24,5 +25,17 @@ export const parseHTML = (html) => {
     const parser = new htmlparser.Parser(handler);
     parser.write(html);
     parser.done();
+  });
+};
+
+export const listFiles = (dir) => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(files);
+    });
   });
 };
