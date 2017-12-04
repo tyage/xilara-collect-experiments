@@ -12,7 +12,7 @@ const getPoC = (report) => {
 const savePoCResponse = async (poc, dir) => {
   const file = `${dir}/poc`;
   const response = await fetch(poc);
-  fs.existsSync(file) || fs.writeFileSync(file, response);
+  fs.writeFileSync(file, response);
 };
 const collectResponse = async (report) => {
   const responseDir = `${responsesDir}/${report}`;
