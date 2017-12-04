@@ -4,7 +4,7 @@ import fs from 'fs';
 export const fetch = (url) => {
   console.log(`start to fetch ${url}`);
   return new Promise((resolve, reject) => {
-    request(url, (error, res, body) => {
+    request(url, { timeout: 30 * 1000 }, (error, res, body) => {
       if (error) {
         return reject(error);
       }
