@@ -11,6 +11,9 @@ const getPoC = (report) => {
 };
 const savePoCResponse = async (poc, dir) => {
   const file = `${dir}/poc`;
+  if (fs.existsSync(file)) {
+    return;
+  }
   try {
     const response = await fetch(poc);
     fs.writeFileSync(file, response);
