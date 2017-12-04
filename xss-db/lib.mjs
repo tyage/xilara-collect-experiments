@@ -6,6 +6,7 @@ export const fetch = (url) => {
   return new Promise((resolve, reject) => {
     request(url, (error, res, body) => {
       if (error) {
+        console.log(`error: ${error}`);
         return reject(error);
       }
       resolve(body);
