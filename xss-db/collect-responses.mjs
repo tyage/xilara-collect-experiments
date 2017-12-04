@@ -10,7 +10,7 @@ const getPoC = (report) => {
   return $('.url textarea').text();
 };
 const savePoCResponse = async (poc, dir) => {
-  const file = `${responseDir}/poc`;
+  const file = `${dir}/poc`;
   const response = await fetch(poc);
   fs.existsSync(file) || fs.writeFileSync(file, response);
 };
