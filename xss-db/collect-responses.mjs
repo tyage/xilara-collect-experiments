@@ -4,8 +4,8 @@ import { listFiles } from './lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const collectResponse = async (report) => {
-  const contents = fs.readFileSync(`${reportDir}/${report}`);
-  const $ = cheerio.load(contents.toString());
+  const contents = fs.readFileSync(`${reportDir}/${report}`).toString();
+  const $ = cheerio.load(contents);
   $('.url').each((i, e) => {
     console.log($(e).html());
   });

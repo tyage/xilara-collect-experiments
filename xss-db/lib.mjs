@@ -1,5 +1,4 @@
 import https from 'https';
-import htmlparser from 'htmlparser2';
 import fs from 'fs';
 
 export const fetch = (url) => {
@@ -18,15 +17,6 @@ export const fetch = (url) => {
 };
 
 export const sleep = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
-
-export const parseHTML = (html) => {
-  return new Promise((resolve, reject) => {
-    const handler = new htmlparser.DomHandler((error, dom) => resolve(dom));
-    const parser = new htmlparser.Parser(handler);
-    parser.write(html);
-    parser.done();
-  });
-};
 
 export const listFiles = (dir) => {
   return new Promise((resolve, reject) => {

@@ -1,7 +1,5 @@
 import fs from 'fs';
-import { parseHTML } from './lib';
-import htmlparser from 'htmlparser2';
-const { DomUtils } = htmlparser;
+import cheerio from 'cheerio';
 
 const getReportsFromList = async () => {
   let reports = [];
@@ -10,34 +8,29 @@ const getReportsFromList = async () => {
   for (let id = 1; id <= lastId; ++id) {
     const filename = `data/openbugbounty/list/${id}`;
     const contents = fs.readFileSync(filename).toString();
-    const html = await parseHTML(contents);
-    const [ reportTable ] = DomUtils.findAll((e) => (
-      e.name === 'table' &&
-      e.attribs.class === 'latest-submissions-main latest-submissions-main-top latest-submissions-main-alexa latest-submissions-latest-page'
-    ), html);
+    const $ = cheerio.load(contents);
+    const [ reportTable ] = $('table.latest-submissions-main.latest-submissions-main-top.latest-submissions-main-alexa.latest-submissions-latest-page').toArray();
     if (!reportTable) {
       console.log(`something wrong with ${id}`);
       return;
     }
 
-    const reportsInPage = reportTable.children
-      .filter((row, i) => row.type === 'tag' && row.name === 'tr')
-      .filter((row, i) => i !== 0)
-      .map((row, i) => {
+    const reportsInPage = $('tr', reportTable)
+      .filter(i => i !== 0)
+      .map((i, row) => {
         try {
-          const tds = DomUtils.getElementsByTagName('td', row);
-          const id = DomUtils.getElementsByTagName('a', tds[0])[0].attribs.href.match(/\d+/)[0];
-          const statusNode = DomUtils.findAll(e => e.name === 'font' || e.name === 'span', [ tds[3] ])[0];
-          const status = statusNode ? statusNode.children[0].data : null;
-          const typeNode = DomUtils.findAll(e => e.name === 'font' || e.name === 'span', [ tds[4] ])[0];
-          const type = typeNode ? typeNode.children[0].data : null;
+          const [ domainTD, researcherTD, dateTD, statusTD, typeTD ] = $('td', row).toArray();
+          const id = $('a', domainTD).attr('href').match(/\d+/)[0];
+          const status = $(statusTD).text().trim();
+          const type = $(typeTD).text().trim();
+          console.log({ id, status, type });
           return { id, status, type };
         } catch(e) {
           console.log(e);
           console.log(`something wrong with row ${i} in page ${id}`)
           return {};
         }
-      });
+      }).toArray();
     reports = [...reports, ...reportsInPage];
   }
 
