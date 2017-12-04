@@ -4,15 +4,23 @@ import { listFiles } from './lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const responsesDir = 'data/openbugbounty/responses';
-const collectResponse = async (report) => {
+const getPoC = (report) => {
   const contents = fs.readFileSync(`${reportDir}/${report}`).toString();
   const $ = cheerio.load(contents);
-  const poc = $('.url textarea').text();
-
+  return $('.url textarea').text();
+};
+const savePoCResponse = async (poc, dir) => {
+  const file = `${responseDir}/poc`;
   const response = await fetch(poc);
-  const responseDir = `${responsesDir}/report`;
-  fs.existsSync(responsesDir) || fs.mkdirSync(responseDir);
-  fs.writeFileSync(`${responseDir}/poc`, response);
+  fs.existsSync(file) || fs.writeFileSync(file, response);
+};
+const collectResponse = async (report) => {
+  const responseDir = `${responsesDir}/${report}`;
+  const poc = getPoC(report);
+
+  fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
+
+  await savePoCResponse(poc, responseDir);
 };
 
 const collectResponses = async () => {
