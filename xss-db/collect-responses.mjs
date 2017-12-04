@@ -26,8 +26,8 @@ const collectResponse = async (report) => {
 const collectResponses = async () => {
   const files = await listFiles(reportDir);
   const reportFiles = files.filter(f => /^\d+$/.test(f));
-  reportFiles.forEach(async (report) => {
+  for (let report of reportFiles) {
     await collectResponse(report);
-  });
+  }
 };
 collectResponses();
