@@ -1,31 +1,50 @@
 import fs from 'fs';
+import url from 'url';
 import cheerio from 'cheerio';
 import { listFiles, fetch } from './lib';
 
 const reportDir = 'data/openbugbounty/reports';
-const responsesDir = 'data/openbugbounty/responses';
+const payloadPatterns = [
+  /(['"]?[^>]*>)?<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/g,
+  /(['"]?[^>]*>)?<[^>]+(alert|confirm|prompt)[^>]+>/g
+];
+
 const getPoC = (report) => {
   const contents = fs.readFileSync(`${reportDir}/${report}`).toString();
   const $ = cheerio.load(contents);
-  return $('.url textarea').text();
+  const poc = $('.url textarea').text();
+  return new url.URL(poc);
 };
-const collectPayload = async (report) => {
-  const responseDir = `${responsesDir}/${report}`;
-  const poc = getPoC(report);
-  const decodedPoC = decodeURIComponent(poc);
-  const pocCandidates = [ poc, decodedPoC ];
+const collectPayload = (pocURL) => {
+  const pocCandidates = [ ...pocURL.searchParams.values() ];
 
+  const payloads = [];
   for (let p of pocCandidates) {
-    /(['"]?[^>]*>)?<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/.match(poc)
-    /['"]?[^>]*>)?<[^>]+(alert|confirm|prompt)[^>]+>/.match(poc)
+    for (let pattern of payloadPatterns) {
+      const matches = p.match(pattern);
+      if (matches) {
+        payloads.push(...matches);
+      }
+    }
   }
+  return payloads;
 };
 
 const collectResponses = async () => {
   const files = await listFiles(reportDir);
   const reportFiles = files.filter(f => /^\d+$/.test(f));
   for (let report of reportFiles) {
-    await collectPayload(report);
+    console.log('=====');
+    console.log(report);
+    try {
+      const poc = getPoC(report);
+      console.log(poc);
+      const payloads = collectPayload(poc);
+      console.log(payloads.length > 0 ? payloads.join('\n') : 'payloads not found...');
+    } catch(e) {
+      console.log('something wrong');
+    }
+    console.log('=====');
   }
 };
 collectResponses();
