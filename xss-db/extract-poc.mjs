@@ -5,8 +5,8 @@ import { listFiles, fetch } from './lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const payloadPatterns = [
-  /(['"]?[^>]*>)?<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/g,
-  /(['"]?[^>]*>)?<[^>]+(alert|confirm|prompt)[^>]+>/g
+  /(['"]?[^>]*>)?<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
+  /(['"]?[^>]*>)?<[^>]+(alert|confirm|prompt)[^>]+>/ig
 ];
 
 const getPoC = (report) => {
