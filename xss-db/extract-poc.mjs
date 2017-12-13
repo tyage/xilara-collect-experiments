@@ -34,6 +34,7 @@ const extractPoc = async () => {
   let payloadFoundReports = 0;
   let payloadNotFoundReports = 0;
   let errorReports = 0;
+  let payloadFrequency = {};
 
   const files = await listFiles(reportDir);
   const reportFiles = files.filter(f => /^\d+$/.test(f));
@@ -43,7 +44,12 @@ const extractPoc = async () => {
       const poc = getPoC(report);
       console.log(poc.href);
       const payloads = collectPayload(poc);
+
       if (payloads.length > 0) {
+        if (payloadFrequency[payloads.length] === undefined) {
+          payloadFrequency[payloads.length] = 0;
+        }
+        ++payloadFrequency[payloads.length]
         ++payloadFoundReports;
         console.log(payloads.join('\n'));
       } else {
@@ -61,6 +67,9 @@ const extractPoc = async () => {
 # of reports payload found: ${payloadFoundReports}
 # of reports payload not found: ${payloadNotFoundReports}
 # of error reports: ${errorReports}
+
+payload frequency:
+${Object.keys(payloadFrequency).map(k => `${k}: ${payloadFrequency[k]}`).join('\n')}
 `);
 };
 extractPoc();
