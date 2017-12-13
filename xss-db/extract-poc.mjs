@@ -5,8 +5,8 @@ import { listFiles, fetch } from './lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const payloadPatterns = [
-  /(['"]?[^>]*>)?<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
-  /(['"]?[^>]*>)?<[^>]+(alert|confirm|prompt)[^>]+>/ig
+  /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
+  /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)[^>]+>/ig
 ];
 
 const getPoC = (report) => {
@@ -30,21 +30,37 @@ const collectPayload = (pocURL) => {
   return payloads;
 };
 
-const collectResponses = async () => {
+const extractPoc = async () => {
+  let payloadFoundReports = 0;
+  let payloadNotFoundReports = 0;
+  let errorReports = 0;
+
   const files = await listFiles(reportDir);
   const reportFiles = files.filter(f => /^\d+$/.test(f));
   for (let report of reportFiles) {
-    console.log('=====');
     console.log(report);
     try {
       const poc = getPoC(report);
-      console.log(poc);
+      console.log(poc.href);
       const payloads = collectPayload(poc);
-      console.log(payloads.length > 0 ? payloads.join('\n') : 'payloads not found...');
+      if (payloads.length > 0) {
+        ++payloadFoundReports;
+        console.log(payloads.join('\n'));
+      } else {
+        ++payloadNotFoundReports;
+        console.log('payloads not found...');
+      }
     } catch(e) {
+      ++errorReports;
       console.log('something wrong');
     }
     console.log('=====');
   }
+
+  console.log(`
+# of reports payload found: ${payloadFoundReports}
+# of reports payload not found: ${payloadNotFoundReports}
+# of error reports: ${errorReports}
+`);
 };
-collectResponses();
+extractPoc();
