@@ -95,7 +95,7 @@ const collectSafeResponses = async () => {
       console.log(safeRequests.join('\n'));
       console.log('=====');
       for (let i in safeRequests) {
-        saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
+        await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
       }
     } catch(e) {
       console.log(e)
