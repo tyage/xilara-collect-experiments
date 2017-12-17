@@ -1,6 +1,6 @@
 # Open Bug Bounty Collector
 
-## Collect Report Information
+## Collect Reports
 
 ```bash
 # Collect report list page ( to data/openbugbounty/lists )
@@ -11,20 +11,20 @@ node --experimental-modules ./scripts/aggregate-report.mjs
 
 # Collect each report using report list ( to data/openbugbounty/reports )
 node --experimental-modules ./scripts/collect-reports.mjs
-
-# Collect each responses ( to data/openbugbounty/responses )
-node --experimental-modules ./scripts/collect-responses.mjs
 ```
 
-## Analyse Reports
+## Analyze Reports
 
 ```bash
-node --experimental-modules ./scripts/reports-analyse.mjs
+node --experimental-modules ./scripts/analyze-reports.mjs
 ```
 
-## Create Safe Request
+## Collect Responses
 
 ```bash
-# Extract Provided PoC
-node --experimental-modules ./scripts/extract-poc.mjs
+# Collect each PoC responses ( to data/openbugbounty/responses )
+node --experimental-modules ./scripts/collect-poc-responses.mjs
+
+# Collect each safe responses ( to data/openbugbounty/responses )
+node --experimental-modules ./scripts/collect-safe-responses.mjs
 ```
