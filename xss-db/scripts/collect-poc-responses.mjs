@@ -1,6 +1,6 @@
 import fs from 'fs';
 import cheerio from 'cheerio';
-import { listFiles, fetch } from './lib';
+import { listFiles, fetch } from '../lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const responsesDir = 'data/openbugbounty/responses';

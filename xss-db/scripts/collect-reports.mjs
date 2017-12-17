@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { fetch, sleep } from './lib';
+import { fetch, sleep } from '../lib';
 
 const reports = JSON.parse(fs.readFileSync('data/openbugbounty/reports.json'));
 const unpatchedXSSReports = reports.filter(r => r.status === 'unpatched' && r.type === 'Cross Site Scripting');
