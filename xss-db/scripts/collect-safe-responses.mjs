@@ -4,6 +4,7 @@ import cheerio from 'cheerio';
 import { listFiles, fetch } from '../lib';
 
 const reportDir = 'data/openbugbounty/reports';
+const responsesDir = 'data/openbugbounty/responses';
 const payloadPatterns = [
   /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
   /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)[^>]+>/ig
@@ -56,6 +57,17 @@ const createSafeRequests = (pocURL, replacements) => {
     return newURL;
   });
 };
+const saveResponse = async (url, filename) => {
+  if (fs.existsSync(filename)) {
+    return;
+  }
+  try {
+    const response = await fetch(url);
+    fs.writeFileSync(filename, response);
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 const collectSafeResponses = async () => {
   let payloadFoundReports = 0;
@@ -67,17 +79,24 @@ const collectSafeResponses = async () => {
   const reportFiles = files.filter(f => /^\d+$/.test(f));
   const safeParams = [ 1, 2 ]; // replace payload with 1 and 2
   for (let report of reportFiles) {
+    const responseDir = `${responsesDir}/${report}`;
+    fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
+
     try {
       const poc = getPoC(report);
       const safeRequests = createSafeRequests(poc, safeParams);
       if (!safeRequests) {
         continue;
       }
+
       console.log('=====');
       console.log(poc.toString());
       console.log('= replaced to =>');
       console.log(safeRequests.join('\n'));
       console.log('=====');
+      for (let i in safeRequests) {
+        saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
+      }
     } catch(e) {
       console.log(e)
     }
