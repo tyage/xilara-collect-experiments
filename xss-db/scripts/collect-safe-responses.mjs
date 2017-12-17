@@ -8,7 +8,15 @@ const payloadPatterns = [
   /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
   /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)[^>]+>/ig
 ];
-
+const isPayload = (param) => {
+  let isMatched = false;
+  for (let pattern of payloadPatterns) {
+    if (param.match(pattern)) {
+      isMatched = true;
+    }
+  }
+  return isMatched;
+};
 const getPoC = (report) => {
   const contents = fs.readFileSync(`${reportDir}/${report}`).toString();
   const $ = cheerio.load(contents);
@@ -18,10 +26,8 @@ const getPoC = (report) => {
 const createSafeRequests = (pocURL, replacements) => {
   const payloads = [];
   for (let [ key, value ] of pocURL.searchParams.entries()) {
-    for (let pattern of payloadPatterns) {
-      if (value.match(pattern)) {
-        payloads.push(key);
-      }
+    if (isPayload(value)) {
+      payloads.push(key);
     }
   }
 
@@ -33,7 +39,7 @@ const createSafeRequests = (pocURL, replacements) => {
   const [ payloadIncludedKey ] = payloads;
   const values = [];
   for (let value of pocURL.searchParams.getAll(payloadIncludedKey)) {
-    if (!value.match(pattern)) {
+    if (!isPayload(value)) {
       values.push(value);
     }
   }
@@ -41,12 +47,13 @@ const createSafeRequests = (pocURL, replacements) => {
   // replace payload to replacement
   // payloadIncludedKey may have paired with other values
   return replacements.map(r => {
-    const newURL = new URL(pocURL);
-    newURL.delete(payloadIncludedKey);
+    const newURL = new url.URL(pocURL);
+    newURL.searchParams.delete(payloadIncludedKey);
     for (let value of values) {
-      newURL.append(payloadIncludedKey, value);
+      newURL.searchParams.append(payloadIncludedKey, value);
     }
-    newURL.append(payloadIncludedKey, r);
+    newURL.searchParams.append(payloadIncludedKey, r);
+    return newURL;
   });
 };
 
@@ -67,11 +74,12 @@ const collectSafeResponses = async () => {
         continue;
       }
       console.log('=====');
-      console.log(poc);
+      console.log(poc.toString());
       console.log('= replaced to =>');
-      console.log(payloads.join('\n'));
+      console.log(safeRequests.join('\n'));
       console.log('=====');
     } catch(e) {
+      console.log(e)
     }
   }
 };
