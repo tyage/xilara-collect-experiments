@@ -16,7 +16,11 @@ node --experimental-modules ./scripts/collect-reports.mjs
 ## Analyze Reports
 
 ```bash
+# Analyze reports
 node --experimental-modules ./scripts/analyze-reports.mjs
+
+# Analyze PoC
+node --experimental-modules ./scripts/analyze-pocs.mjs
 ```
 
 ## Collect Responses

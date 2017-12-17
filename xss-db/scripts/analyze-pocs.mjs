@@ -1,7 +1,7 @@
 import fs from 'fs';
 import url from 'url';
 import cheerio from 'cheerio';
-import { listFiles, fetch } from './lib';
+import { listFiles, fetch } from '../lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const payloadPatterns = [
@@ -30,7 +30,7 @@ const collectPayload = (pocURL) => {
   return payloads;
 };
 
-const extractPoc = async () => {
+const analyzePoC = async () => {
   let payloadFoundReports = 0;
   let payloadNotFoundReports = 0;
   let errorReports = 0;
@@ -72,4 +72,4 @@ payload frequency:
 ${Object.keys(payloadFrequency).map(k => `${k}: ${payloadFrequency[k]}`).join('\n')}
 `);
 };
-extractPoc();
+analyzePoC();
