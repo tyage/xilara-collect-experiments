@@ -77,7 +77,7 @@ const collectSafeResponses = async () => {
 
   const files = await listFiles(reportDir);
   const reportFiles = files.filter(f => /^\d+$/.test(f));
-  const safeParams = [ 1, 2 ]; // replace payload with 1 and 2
+  const safeParams = [ 1, 2, 3 ]; // replace payload with 1, 2 and 3
   for (let report of reportFiles) {
     const responseDir = `${responsesDir}/${report}`;
     fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
