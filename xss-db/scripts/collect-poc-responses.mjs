@@ -2,6 +2,7 @@ import fs from 'fs';
 import cheerio from 'cheerio';
 import { listFiles, fetch } from '../lib';
 
+// XXX: reports.jsonを参照したほうが行儀がよい
 const reportDir = 'data/openbugbounty/reports';
 const responsesDir = 'data/openbugbounty/responses';
 const getPoC = (report) => {

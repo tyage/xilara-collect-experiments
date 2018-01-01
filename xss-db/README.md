@@ -13,6 +13,21 @@ node --experimental-modules ./scripts/aggregate-report.mjs
 node --experimental-modules ./scripts/collect-reports.mjs
 ```
 
+## Collect Responses
+
+ここは OpenBugBounty 特有のものではなく、一般化できそう.
+
+```bash
+# Collect each PoC responses ( to data/openbugbounty/responses )
+node --experimental-modules ./scripts/collect-poc-responses.mjs
+
+# Filter valid PoC by confirming `alert`, `prompt` and `confirm` ( to data/openbugbounty/valid-reports.json )
+node --experimental-modules ./scripts/collect-valid-reports.mjs
+
+# Collect each safe responses ( to data/openbugbounty/responses )
+node --experimental-modules ./scripts/collect-safe-responses.mjs
+```
+
 ## Analyze Reports
 
 ```bash
@@ -21,14 +36,4 @@ node --experimental-modules ./scripts/analyze-reports.mjs
 
 # Analyze PoC
 node --experimental-modules ./scripts/analyze-pocs.mjs
-```
-
-## Collect Responses
-
-```bash
-# Collect each PoC responses ( to data/openbugbounty/responses )
-node --experimental-modules ./scripts/collect-poc-responses.mjs
-
-# Collect each safe responses ( to data/openbugbounty/responses )
-node --experimental-modules ./scripts/collect-safe-responses.mjs
 ```
