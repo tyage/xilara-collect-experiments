@@ -1,15 +1,31 @@
 import chromeLauncher from 'chrome-launcher';
 import chrome from 'chrome-remote-interface'
+import fs from 'fs';
 import { listFiles } from '../lib';
 
 const responsesDir = `${process.cwd()}/data/openbugbounty/responses`;
 
-const launchCDP = async (chromeProcess) => {
+const launchCDP = (chromeProcess) => {
   return new Promise((resolve, reject) => {
     chrome({
       port: chromeProcess.port
     }, async (client) => {
       resolve(client);
+    });
+  });
+};
+
+const checkDialogOpening = async (Page, url) => {
+  const timeout = 1000;
+  return new Promise((resolve, reject) => {
+    Page.javascriptDialogOpening(() => {
+      resolve(true);
+    });
+    Page.navigate({ url });
+    Page.loadEventFired(() => {
+      setTimeout(() => {
+        resolve(false);
+      }, timeout);
     });
   });
 };
@@ -22,16 +38,22 @@ const collectValidReports = async () => {
     chromeProcess.kill();
   });
 
-  const { Page } = await launchCDP(chromeProcess);
+  const { Page, Runtime } = await launchCDP(chromeProcess);
   await Page.enable();
+  await Runtime.enable();
 
   const files = await listFiles(responsesDir);
   const responseDir = files.filter(f => /^\d+$/.test(f));
   for (let report of responseDir) {
-    const pocURL = `file://${responsesDir}/${report}/poc`;
+    const pocFile = `${responsesDir}/${report}/poc`;
+    const pocURL = `file://${pocFile}`;
     console.log(pocURL)
-    Page.navigate({ url: pocURL });
-    break;
+    if (!fs.existsSync(pocFile)) {
+      console.log('not found')
+      continue;
+    }
+    const isOpening = await checkDialogOpening(Page, pocURL);
+    console.log(report, isOpening);
   }
 };
 collectValidReports();
