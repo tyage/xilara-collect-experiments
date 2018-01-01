@@ -3,7 +3,7 @@ import chrome from 'chrome-remote-interface'
 import fs from 'fs';
 import { listFiles } from '../lib';
 
-const responsesDir = `${process.cwd()}/data/openbugbounty/responses`;
+const responsesDir = 'data/openbugbounty/responses';
 
 const launchCDP = (chromeProcess) => {
   return new Promise((resolve, reject) => {
@@ -46,10 +46,9 @@ const collectValidReports = async () => {
   const responseDir = files.filter(f => /^\d+$/.test(f));
   for (let report of responseDir) {
     const pocFile = `${responsesDir}/${report}/poc`;
-    const pocURL = `file://${pocFile}`;
-    console.log(pocURL)
+    const pocURL = `http://localhost:8080/${pocFile}`;
+    console.log(pocURL);
     if (!fs.existsSync(pocFile)) {
-      console.log('not found')
       continue;
     }
     const isOpening = await checkDialogOpening(Page, pocURL);

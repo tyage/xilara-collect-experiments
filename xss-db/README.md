@@ -22,6 +22,7 @@ node --experimental-modules ./scripts/collect-reports.mjs
 node --experimental-modules ./scripts/collect-poc-responses.mjs
 
 # Filter valid PoC by confirming `alert`, `prompt` and `confirm` ( to data/openbugbounty/valid-reports.json )
+php -S localhost:8080 scripts/server.php
 node --experimental-modules ./scripts/collect-valid-reports.mjs
 
 # Collect each safe responses ( to data/openbugbounty/responses )
