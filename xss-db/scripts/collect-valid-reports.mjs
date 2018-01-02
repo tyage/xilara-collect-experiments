@@ -16,11 +16,11 @@ const launchCDP = (chromeProcess) => {
 };
 
 const checkDialogOpening = async (Page, url) => {
-  const timeoutAfterLoad = 1000 * 3;
+  const timeoutAfterLoad = 1000 * 1;
   const timeout = 1000 * 5;
   return new Promise((resolve, reject) => {
     Page.javascriptDialogOpening(() => {
-      Page.javascriptDialogOpening(true);
+      Page.javascriptDialogOpening(false);
       resolve(true);
     });
     Page.navigate({ url });
@@ -36,36 +36,27 @@ const checkDialogOpening = async (Page, url) => {
 };
 
 const collectValidReports = async () => {
-  const chromeProcess = await chromeLauncher.launch({
-    //chromeFlags: ['--headless']
-  });
-  process.on('exit', () => {
-    chromeProcess.kill();
-  });
-
-  const { Page } = await launchCDP(chromeProcess);
-  await Page.enable();
-
   const files = await listFiles(responsesDir);
   const responseDir = files.filter(f => /^\d+$/.test(f));
   const validReports = [];
   for (let report of responseDir) {
+    const chromeProcess = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+    const { Page } = await launchCDP(chromeProcess);
+    await Page.enable();
 
     const pocFile = `${responsesDir}/${report}/poc`;
     const pocURL = `http://localhost:8080/${pocFile}`;
     console.log(pocURL);
-    if (!fs.existsSync(pocFile)) {
-      continue;
-    }
-    const isOpening = await checkDialogOpening(Page, pocURL);
-    console.log(report, isOpening);
-    if (isOpening) {
-      validReports.push(report);
+
+    if (fs.existsSync(pocFile)) {
+      const isOpening = await checkDialogOpening(Page, pocURL);
+      console.log(report, isOpening);
+      if (isOpening) {
+        validReports.push(report);
+      }
     }
 
-    Page.navigate({ url: 'about:blank' });
-
-    await sleep(1000);
+    chromeProcess.kill();
   }
 
   fs.writeFileSync('data/openbugbounty/valid-reports.json', JSON.stringify(validReports));
