@@ -20,7 +20,7 @@ const checkDialogOpening = async (Page, url) => {
   const timeout = 1000 * 5;
   return new Promise((resolve, reject) => {
     Page.javascriptDialogOpening(() => {
-      Page.javascriptDialogOpening(false);
+      Page.handleJavaScriptDialog({ accept: false });
       resolve(true);
     });
     Page.navigate({ url });
