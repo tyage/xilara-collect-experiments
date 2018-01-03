@@ -64,18 +64,22 @@ ${pocContent}`;
   ]);
 
   // intercept request and response poc
-  Network.requestIntercepted(({ interceptionId, request }) => {
-    const isPoCRequest = request.url === 'http://localhost/';
-    if (isPoCRequest) {
-      Network.continueInterceptedRequest({
-        interceptionId,
-        rawResponse: new Buffer(pocResponse, 'binary').toString('base64')
-      });
-    } else {
-      Network.continueInterceptedRequest({
-        interceptionId,
-        errorReason: 'Aborted'
-      });
+  Network.requestIntercepted(async ({ interceptionId, request }) => {
+    try {
+      const isPoCRequest = request.url === 'http://localhost/';
+      if (isPoCRequest) {
+        await Network.continueInterceptedRequest({
+          interceptionId,
+          rawResponse: new Buffer(pocResponse, 'binary').toString('base64')
+        });
+      } else {
+        await Network.continueInterceptedRequest({
+          interceptionId,
+          errorReason: 'Aborted'
+        });
+      }
+    } catch(e) {
+      // error happens when process finished and Network will terminate
     }
   });
 
