@@ -35,28 +35,73 @@ const checkDialogOpening = async (Page, url) => {
   });
 };
 
+const isReportValid = async (report) => {
+  const pocFile = `${responsesDir}/${report}/poc`;
+  if (!fs.existsSync(pocFile)) {
+    return false;
+  }
+  const pocContent = fs.readFileSync(pocFile);
+  const pocResponse = `HTTP/1.1 200 OK
+Host: localhost:8080
+Connection: close
+Content-type: text/html; charset=UTF-8
+
+${pocContent}`;
+
+  // start chrome process and set event listener to kill
+  const chromeProcess = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+  const killChrome = () => {
+    try { chromeProcess.kill(); } catch(e) {}
+  };
+  process.on('exit', killChrome);
+
+  const { Page, Network } = await launchCDP(chromeProcess);
+
+  await Promise.all([
+    Network.enable(),
+    Page.enable(),
+    Network.setRequestInterceptionEnabled({ enabled: true })
+  ]);
+
+  // intercept request and response poc
+  Network.requestIntercepted(({ interceptionId, request }) => {
+    const isPoCRequest = request.url === 'http://localhost/';
+    if (isPoCRequest) {
+      Network.continueInterceptedRequest({
+        interceptionId,
+        rawResponse: new Buffer(pocResponse, 'binary').toString('base64')
+      });
+    } else {
+      Network.continueInterceptedRequest({
+        interceptionId,
+        errorReason: 'Aborted'
+      });
+    }
+  });
+
+  const isDialogOpening = await checkDialogOpening(Page, 'http://localhost');
+
+  await Promise.all([
+    Page.disable(),
+    Network.disable()
+  ]);
+
+  // kill chrome process and remove event listener
+  chromeProcess.kill();
+  process.removeListener('exit', killChrome);
+
+  return isDialogOpening;
+};
 const collectValidReports = async () => {
   const files = await listFiles(responsesDir);
   const responseDir = files.filter(f => /^\d+$/.test(f));
   const validReports = [];
   for (let report of responseDir) {
-    const chromeProcess = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
-    const { Page } = await launchCDP(chromeProcess);
-    await Page.enable();
-
-    const pocFile = `${responsesDir}/${report}/poc`;
-    const pocURL = `http://localhost:8080/${pocFile}`;
-    console.log(pocURL);
-
-    if (fs.existsSync(pocFile)) {
-      const isOpening = await checkDialogOpening(Page, pocURL);
-      console.log(report, isOpening);
-      if (isOpening) {
-        validReports.push(report);
-      }
+    const isValid = await isReportValid(report);
+    console.log(report, isValid);
+    if (isValid) {
+      validReports.push(report);
     }
-
-    chromeProcess.kill();
   }
 
   fs.writeFileSync('data/openbugbounty/valid-reports.json', JSON.stringify(validReports));
