@@ -70,15 +70,13 @@ const saveResponse = async (url, filename) => {
 };
 
 const collectSafeResponses = async () => {
+  const validReports = JSON.parse(fs.readFileSync('data/openbugbounty/valid-reports.json'));
   let payloadFoundReports = 0;
   let payloadNotFoundReports = 0;
   let errorReports = 0;
-  let payloadFrequency = {};
 
-  const files = await listFiles(reportDir);
-  const reportFiles = files.filter(f => /^\d+$/.test(f));
   const safeParams = [ 1, 2, 3 ]; // replace payload with 1, 2 and 3
-  for (let report of reportFiles) {
+  for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
     fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
 
@@ -86,6 +84,7 @@ const collectSafeResponses = async () => {
       const poc = getPoC(report);
       const safeRequests = createSafeRequests(poc, safeParams);
       if (!safeRequests) {
+        ++payloadNotFoundReports;
         continue;
       }
 
@@ -97,9 +96,15 @@ const collectSafeResponses = async () => {
       for (let i in safeRequests) {
         await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
       }
+      ++payloadFoundReports;
     } catch(e) {
+      ++errorReports;
       console.log(e)
     }
   }
+
+  console.log(`payload found in: ${payloadFoundReports} reports`);
+  console.log(`payload not found in: ${payloadNotFoundReports} reports`);
+  console.log(`error occured in: ${errorReports} reports`);
 };
 collectSafeResponses();
