@@ -100,10 +100,15 @@ const collectValidReports = async () => {
   const responseDir = files.filter(f => /^\d+$/.test(f));
   const validReports = [];
   for (let report of responseDir) {
-    const isValid = await isReportValid(report);
-    console.log(report, isValid);
-    if (isValid) {
-      validReports.push(report);
+    try {
+      const isValid = await isReportValid(report);
+      console.log(report, isValid);
+      if (isValid) {
+        validReports.push(report);
+      }
+    } catch(e) {
+      console.log(e);
+      console.log(report, 'failure');
     }
   }
 
