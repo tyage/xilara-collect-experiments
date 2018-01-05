@@ -1,4 +1,5 @@
 import childProcess from 'child_process';
+import fs from 'fs';
 
 const [ node, script, ...args ] = process.argv;
 const preference = `${process.cwd()}/preferences.xml`;
@@ -14,4 +15,8 @@ result.stdout.on('data', (data) => {
 });
 result.stderr.on('data', (data) => {
   process.stderr.write(data);
+});
+result.on('close', (code) => {
+  const template = fs.readFileSync('../Xilara/roadrunner/output/test/test00.xml');
+  process.stdout.write(template);
 });
