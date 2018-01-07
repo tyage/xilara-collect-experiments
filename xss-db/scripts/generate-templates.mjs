@@ -11,11 +11,12 @@ const createTemplate = (report, preference, safeResponses) => {
   });
 
   return new Promise((resolve, reject) => {
+    let output = '';
     result.stdout.on('data', (data) => {
-      //process.stdout.write(data);
+      output += data;
     });
     result.stderr.on('data', (data) => {
-      //process.stderr.write(data);
+      output += data;
     });
     result.on('close', (code) => {
       const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
@@ -23,7 +24,7 @@ const createTemplate = (report, preference, safeResponses) => {
         const template = fs.readFileSync(templateFile);
         resolve(template);
       } else {
-        reject();
+        reject(output);
       }
     });
   });
