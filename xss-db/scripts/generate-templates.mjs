@@ -20,7 +20,7 @@ const createTemplate = (report, preference, safeResponses) => {
     });
     setTimeout(() => {
       roadrunner.kill('SIGHUP');
-      reject(`skip ${report}`);
+      reject(`${output}\nskip ${report}`);
     }, 1000 * 20);
     roadrunner.on('close', (code) => {
       const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
