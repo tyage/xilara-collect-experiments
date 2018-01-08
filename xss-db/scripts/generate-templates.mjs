@@ -36,9 +36,12 @@ const createAllTemplate = async () => {
   const validReports = JSON.parse(fs.readFileSync('data/openbugbounty/valid-reports.json'));
 
   for (let report of validReports) {
-    console.log(`generate template of report ${report}`);
     const responseDir = `${responsesDir}/${report}`;
     const templateFile = `data/openbugbounty/templates/${report}`;
+
+    if (fs.existsSync(templateFile)) {
+      continue;
+    }
 
     const safeResponses = [1, 2].map(id => `${responseDir}/${id}`);
     const allExists = safeResponses.filter(r => fs.existsSync(r)).length === safeResponses.length;
@@ -46,6 +49,7 @@ const createAllTemplate = async () => {
       continue;
     }
 
+    console.log(`generate template of report ${report}`);
     const template = await createTemplate(report, preference, safeResponses);
     fs.writeFileSync(templateFile, template);
   }
