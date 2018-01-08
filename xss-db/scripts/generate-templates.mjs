@@ -2,7 +2,7 @@ import childProcess from 'child_process';
 import fs from 'fs';
 
 const createTemplate = (report, preference, safeResponses) => {
-  const result = childProcess.spawn('./gradlew', [
+  const roadrunner = childProcess.spawn('./gradlew', [
     'run',
     `-Pargs="-N${report} -O${preference} ${safeResponses.join(' ')}"`
   ], {
@@ -12,13 +12,17 @@ const createTemplate = (report, preference, safeResponses) => {
 
   return new Promise((resolve, reject) => {
     let output = '';
-    result.stdout.on('data', (data) => {
+    roadrunner.stdout.on('data', (data) => {
       output += data;
     });
-    result.stderr.on('data', (data) => {
+    roadrunner.stderr.on('data', (data) => {
       output += data;
     });
-    result.on('close', (code) => {
+    setTimeout(() => {
+      roadrunner.kill('SIGHUP');
+      reject(`skip ${report}`);
+    }, 1000 * 20);
+    roadrunner.on('close', (code) => {
       const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
       if (fs.existsSync(templateFile)) {
         const template = fs.readFileSync(templateFile);
@@ -49,9 +53,17 @@ const createAllTemplate = async () => {
       continue;
     }
 
-    console.log(`generate template of report ${report}`);
-    const template = await createTemplate(report, preference, safeResponses);
-    fs.writeFileSync(templateFile, template);
+    if (+report === 105390) {
+      continue;
+    }
+
+    try {
+      console.log(`generate template of report ${report}`);
+      const template = await createTemplate(report, preference, safeResponses);
+      fs.writeFileSync(templateFile, template);
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 createAllTemplate();
