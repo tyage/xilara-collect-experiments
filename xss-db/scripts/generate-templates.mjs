@@ -19,7 +19,7 @@ const createTemplate = (report, preference, safeResponses) => {
       output += data;
     });
     setTimeout(() => {
-      roadrunner.kill('SIGHUP');
+      roadrunner.kill('SIGKILL');
       reject(`${output}\nskip ${report}`);
     }, 1000 * 20);
     roadrunner.on('close', (code) => {
