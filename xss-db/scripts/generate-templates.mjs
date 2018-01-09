@@ -2,28 +2,33 @@ import childProcess from 'child_process';
 import fs from 'fs';
 
 const createTemplate = (report, preference, safeResponses) => {
+  const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
   const roadrunner = childProcess.spawn('./gradlew', [
     'run',
     `-Pargs="-N${report} -O${preference} ${safeResponses.join(' ')}"`
   ], {
     cwd: '../Xilara/roadrunner',
-    shell: true
+    shell: true,
+    detached: true // detach to create a new group of process
+  });
+
+  let output = '';
+  roadrunner.stdout.on('data', (data) => {
+    output += data;
+  });
+  roadrunner.stderr.on('data', (data) => {
+    output += data;
   });
 
   return new Promise((resolve, reject) => {
-    let output = '';
-    roadrunner.stdout.on('data', (data) => {
-      output += data;
-    });
-    roadrunner.stderr.on('data', (data) => {
-      output += data;
-    });
-    setTimeout(() => {
-      roadrunner.kill('SIGKILL');
+    const killTimer = setTimeout(() => {
+      process.kill(-roadrunner.pid, 'SIGKILL');
       reject(`${output}\nskip ${report}`);
     }, 1000 * 20);
+
     roadrunner.on('close', (code) => {
-      const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
+      clearTimeout(killTimer);
+
       if (fs.existsSync(templateFile)) {
         const template = fs.readFileSync(templateFile);
         resolve(template);
