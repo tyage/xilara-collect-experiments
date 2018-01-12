@@ -3,7 +3,8 @@ module.exports = {
     {
       name: 'generate-templates',
       script: './scripts/generate-templates.mjs',
-      node_args: '--experimental-modules'
+      node_args: '--experimental-modules',
+      args: '0'
     }
   ]
 };
