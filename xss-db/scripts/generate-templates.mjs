@@ -1,7 +1,9 @@
 import childProcess from 'child_process';
 import fs from 'fs';
 
-const createTemplate = (report, preference, safeResponses) => {
+const timeLimit = process.argv[2];
+
+const createTemplate = (report, preference, safeResponses, timeLimit = 20) => {
   const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
   const roadrunner = childProcess.spawn('./gradlew', [
     'run',
@@ -21,13 +23,18 @@ const createTemplate = (report, preference, safeResponses) => {
   });
 
   return new Promise((resolve, reject) => {
-    const killTimer = setTimeout(() => {
-      process.kill(-roadrunner.pid, 'SIGKILL');
-      reject(`${output}\nskip ${report}`);
-    }, 1000 * 20);
+    let killTimer;
+    if (timeLimit) {
+      killTimer = setTimeout(() => {
+        process.kill(-roadrunner.pid, 'SIGKILL');
+        reject(`${output}\nskip ${report}`);
+      }, timeLimit * 1000);
+    }
 
     roadrunner.on('close', (code) => {
-      clearTimeout(killTimer);
+      if (killTimer) {
+        clearTimeout(killTimer);
+      }
 
       if (fs.existsSync(templateFile)) {
         const template = fs.readFileSync(templateFile);
@@ -58,13 +65,9 @@ const createAllTemplate = async () => {
       continue;
     }
 
-    if (+report === 105390) {
-      continue;
-    }
-
     try {
       console.log(`generate template of report ${report}`);
-      const template = await createTemplate(report, preference, safeResponses);
+      const template = await createTemplate(report, preference, safeResponses, timeLimit && +timeLimit);
       fs.writeFileSync(templateFile, template);
     } catch (e) {
       console.log(e);
