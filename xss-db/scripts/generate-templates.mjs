@@ -1,13 +1,24 @@
 import childProcess from 'child_process';
 import fs from 'fs';
+import tmp from 'tmp-promise';
+import { formatHTMLByChrome } from '../../Xilara/src/html-format'
 
 const timeLimit = process.argv[2];
 
-const createTemplate = (report, preference, safeResponses, timeLimit = 20) => {
+const createTemplate = async (report, preference, safeResponses, timeLimit = 20) => {
+  // TODO: Xilaraを使うように
+  const { path: buildDir } = await tmp.dir({ prefix: `roadrunner-${(new Date()).getTime()}-` })
+  const formattedHTMLFiles = await Promise.all(safeResponses.map(async (html) => {
+    const html = await formatHTMLByChrome(html);
+    const formattedHTMLFile = `${buildDir}/${i}.html`;
+    fs.writeFileSync(formattedHTMLFile, html);
+    return formattedHTMLFile;
+  }));
+
   const templateFile = `../Xilara/roadrunner/output/${report}/${report}00.xml`;
   const roadrunner = childProcess.spawn('./gradlew', [
     'run',
-    `-Pargs="-N${report} -O${preference} ${safeResponses.join(' ')}"`
+    `-Pargs="-N${report} -O${preference} ${formattedHTMLFiles.join(' ')}"`
   ], {
     cwd: '../Xilara/roadrunner',
     shell: true,

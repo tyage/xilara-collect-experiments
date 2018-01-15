@@ -13,7 +13,8 @@
     "chrome-launcher": "^0.10.0",
     "chrome-remote-interface": "^0.25.5",
     "pm2": "^2.9.1",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "tmp-promise": "^1.0.4"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
