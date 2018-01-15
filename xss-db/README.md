@@ -45,5 +45,5 @@ node --experimental-modules ./scripts/analyze-pocs.mjs
 ./node_modules/.bin/pm2 start generate-templates.config.js
 
 # Check if response is acceptable
-node --experimental-modules ./scripts/detect-xss.mjs --template=./data/openbugbounty/templates/[rid] ./data/openbugbounty/responses/[rid]/[file]
+node --experimental-modules ./scripts/template-matching.mjs --template=./data/openbugbounty/templates/[rid] ./data/openbugbounty/responses/[rid]/[file]
 ```
