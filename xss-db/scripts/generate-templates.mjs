@@ -8,9 +8,9 @@ const timeLimit = process.argv[2];
 const createTemplate = async (report, preference, safeResponses, timeLimit = 20) => {
   // TODO: Xilaraを使うように
   const { path: buildDir } = await tmp.dir({ prefix: `roadrunner-${(new Date()).getTime()}-` })
-  const formattedHTMLFiles = await Promise.all(safeResponses.map(async (html) => {
+  const formattedHTMLFiles = await Promise.all(safeResponses.map(async (html, i) => {
     const formattedHTML = await formatHTMLByChrome(html);
-    const formattedHTMLFile = `${buildDir}/${i}.html`;
+    const formattedHTMLFile = `${buildDir}/${report}-${i}.html`;
     fs.writeFileSync(formattedHTMLFile, formattedHTML);
     return formattedHTMLFile;
   }));
