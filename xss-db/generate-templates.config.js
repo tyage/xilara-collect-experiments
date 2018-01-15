@@ -2,8 +2,8 @@ module.exports = {
   apps : [
     {
       name: 'generate-templates',
+      interpreter: 'babel-node',
       script: './scripts/generate-templates.mjs',
-      node_args: '--experimental-modules',
       args: '0'
     }
   ]
