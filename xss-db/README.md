@@ -42,8 +42,8 @@ node --experimental-modules ./scripts/analyze-pocs.mjs
 
 ```bash
 # Generate template with some responses
-./node_modules/.bin/pm2 start generate-templates.config.js
+npx pm2 start generate-templates.config.js
 
 # Check if response is acceptable
-node --experimental-modules ./scripts/template-matching.mjs --template=./data/openbugbounty/templates/[rid] ./data/openbugbounty/responses/[rid]/[file]
+npx babel-node ./scripts/template-matching.mjs
 ```
