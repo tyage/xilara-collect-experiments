@@ -19,12 +19,16 @@ const analyzeTemplateMatchingResult = async () => {
     const pocResponses = ['poc'].map(id => `${responseDir}/${id}`);
 
     for (let html of safeResponses) {
-      const result = await isHTMLMatchWithTemplate(html, templateFile);
+      const htmlContent = fs.readFileSync(html);
+      const result = await isHTMLMatchWithTemplate(htmlContent, template);
       // result should be true
+      console.log(html, result);
     }
     for (let html of pocResponses) {
-      const result = await isHTMLMatchWithTemplate(html, templateFile);
+      const htmlContent = fs.readFileSync(html);
+      const result = await isHTMLMatchWithTemplate(htmlContent, template);
       // result should not be true
+      console.log(html, result);
     }
   }
 };
