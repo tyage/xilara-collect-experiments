@@ -9,9 +9,9 @@ const createTemplate = async (report, preference, safeResponses, timeLimit = 20)
   // TODO: Xilaraを使うように
   const { path: buildDir } = await tmp.dir({ prefix: `roadrunner-${(new Date()).getTime()}-` })
   const formattedHTMLFiles = await Promise.all(safeResponses.map(async (html) => {
-    const html = await formatHTMLByChrome(html);
+    const formattedHTML = await formatHTMLByChrome(html);
     const formattedHTMLFile = `${buildDir}/${i}.html`;
-    fs.writeFileSync(formattedHTMLFile, html);
+    fs.writeFileSync(formattedHTMLFile, formattedHTML);
     return formattedHTMLFile;
   }));
 
