@@ -11,17 +11,19 @@ const analyzeTemplateMatchingResult = async () => {
   let allReports = 0;
   let correctReports = 0;
   let missBlockedReports = 0;
+  let verificationMissBlockedReports = 0;
   let passPoCReports = 0;
 
   for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
     const roadrunnerFile = `data/openbugbounty/templates/${report}`;
 
-    const safeResponses = [1, 2, 3].map(id => `${responseDir}/${id}`);
+    const baseResponses = [1, 2].map(id => `${responseDir}/${id}`);
+    const safeVerificationResponses = [3].map(id => `${responseDir}/${id}`);
     const pocResponses = ['poc'].map(id => `${responseDir}/${id}`);
 
     let allFilesExist = true;
-    for (let file of [ roadrunnerFile, ...safeResponses, ...pocResponses ]) {
+    for (let file of [ roadrunnerFile, ...baseResponses, ...safeVerificationResponses, ...pocResponses ]) {
       if (!fs.existsSync(file)) {
         allFilesExist = false;
         break;
@@ -32,8 +34,7 @@ const analyzeTemplateMatchingResult = async () => {
     }
 
     ++allReports;
-    const htmls = [1, 2].map(id => `${responseDir}/${id}`);
-    const formattedHTMLs = await Promise.all(htmls.map(async (htmlFile) => {
+    const formattedHTMLs = await Promise.all(baseResponses.map(async (htmlFile) => {
       const html = fs.readFileSync(htmlFile).toString();
       return await formatHTMLByChrome(html);
     }));
@@ -42,8 +43,8 @@ const analyzeTemplateMatchingResult = async () => {
     console.log(`===== start report ${report}`);
 
     let missBlocked = false;
-    for (let html of safeResponses) {
-      const htmlContent = fs.readFileSync(html);
+    for (let html of baseResponses) {
+      const htmlContent = fs.readFileSync(html).toString();
       const { result, matchMap } = await isHTMLMatchWithTemplate(htmlContent, template);
       // result should be true
       console.log(html, result);
@@ -55,9 +56,23 @@ const analyzeTemplateMatchingResult = async () => {
       ++missBlockedReports;
     }
 
+    let verificationMissBlocked = false;
+    for (let html of safeVerificationResponses) {
+      const htmlContent = fs.readFileSync(html).toString();
+      const { result, matchMap } = await isHTMLMatchWithTemplate(htmlContent, template);
+      // result should be true
+      console.log(html, result);
+      if (!result) {
+        verificationMissBlocked = true;
+      }
+    }
+    if (verificationMissBlocked) {
+      ++verificationMissBlockedReports;
+    }
+
     let passPoC = false;
     for (let html of pocResponses) {
-      const htmlContent = fs.readFileSync(html);
+      const htmlContent = fs.readFileSync(html).toString();
       const { result } = await isHTMLMatchWithTemplate(htmlContent, template);
       // result should not be true
       console.log(html, result);
@@ -69,7 +84,7 @@ const analyzeTemplateMatchingResult = async () => {
       ++passPoCReports;
     }
 
-    if (!missBlocked && passPoC) {
+    if (!missBlocked && !passPoC) {
       ++correctReports;
     }
   }
@@ -78,6 +93,7 @@ const analyzeTemplateMatchingResult = async () => {
 all reports: ${allReports}
 # of reports which xilara can work: ${correctReports}
 # of reports which safe responses blocked: ${missBlockedReports}
+# of reports which verification safe responses blocked: ${verificationMissBlockedReports}
 # of reports which poc passes: ${passPoCReports}
 `);
 };
