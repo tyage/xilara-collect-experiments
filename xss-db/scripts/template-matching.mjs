@@ -84,7 +84,7 @@ const analyzeTemplateMatchingResult = async () => {
       ++passPoCReports;
     }
 
-    if (!missBlocked && !passPoC) {
+    if (!missBlocked && !verificationMissBlocked && !passPoC) {
       ++correctReports;
     }
   }
