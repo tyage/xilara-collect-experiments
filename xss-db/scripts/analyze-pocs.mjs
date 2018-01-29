@@ -5,8 +5,9 @@ import { listFiles, fetch } from '../lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const payloadPatterns = [
-  /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
-  /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)[^>]+>/ig
+  /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*(<\/[^>]+>)?/ig, // "><script>alert(1)</script>
+  /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)([^>]+>)?/ig, // "><img src=x onerror=alert(1)>
+  /['"][^>]+=[^>]*(alert|confirm|prompt)/ig // " onmouseover=alert(1)
 ];
 
 const getPoC = (report) => {
@@ -16,7 +17,7 @@ const getPoC = (report) => {
   return new url.URL(poc);
 };
 const collectPayload = (pocURL) => {
-  const pocCandidates = [ ...pocURL.searchParams.values() ];
+  const pocCandidates = [ ...pocURL.searchParams.values(), decodeURIComponent(pocURL.search), decodeURIComponent(pocURL.pathname), decodeURIComponent(pocURL.href) ];
 
   const payloads = [];
   for (let p of pocCandidates) {
