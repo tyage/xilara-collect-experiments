@@ -6,8 +6,8 @@ import { listFiles, fetch, sleep } from '../lib';
 const reportDir = 'data/openbugbounty/reports';
 const responsesDir = 'data/openbugbounty/responses';
 const payloadPatterns = [
-  /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
-  /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)[^>]+>/ig
+  /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*(<\/[^>]+>)?/ig, // "><script>alert(1)</script>
+  /(['"]?[^>]*>)*<[^>]+(alert|confirm|prompt)([^>]+>)?/ig // "><img src=x onerror=alert(1)>
 ];
 const isPayload = (param) => {
   let isMatched = false;
@@ -56,7 +56,6 @@ const createSafeRequests = (pocURL, replacements) => {
   // replace payload to replacement
   // payloadIncludedKey may have paired with other values
   return replacements.map(r => {
-    r = r.toString();
     const newURL = new url.URL(pocURL);
     const base64R = new Buffer(r).toString('base64');
     newURL.searchParams.delete(payloadIncludedKey);
@@ -85,7 +84,7 @@ const collectSafeResponses = async () => {
   let payloadNotFoundReports = 0;
   let errorReports = 0;
 
-  const safeParams = [ 1, 2, 3, 4, 5 ]; // replace payload with 1 - 5
+  const safeParams = [ 1, 2, 3, 4, 5 ].map(i => i.toString()); // replace payload with 1 - 5
   for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
     fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
