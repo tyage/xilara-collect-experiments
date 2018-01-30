@@ -33,6 +33,12 @@ const analyzeTemplateMatchingResult = async () => {
       continue;
     }
 
+    // XXX: template for these reports are broken because it includes CDATA in CDATA
+    // XXX: fix the problem
+    if ([113850, 219900, 243710, 248640, 262540, 265520, 92930].includes(+report)) {
+      continue
+    }
+
     ++allReports;
     const formattedHTMLs = await Promise.all(baseResponses.map(async (htmlFile) => {
       const html = fs.readFileSync(htmlFile).toString();
