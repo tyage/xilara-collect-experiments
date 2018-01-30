@@ -11,9 +11,8 @@ const payloadPatterns = [
 ];
 const isPayload = (param) => {
   let isMatched = false;
-  const base64Decoded = new Buffer(param, 'base64').toString();
   for (let pattern of payloadPatterns) {
-    if (param.match(pattern) || base64Decoded.match(pattern)) {
+    if (param.match(pattern)) {
       isMatched = true;
     }
   }
@@ -28,8 +27,12 @@ const getPoC = (report) => {
 const createSafeRequests = (pocURL, replacements) => {
   const payloads = [];
   for (let [ key, value ] of pocURL.searchParams.entries()) {
+    const base64Decoded = new Buffer(value, 'base64').toString();
     if (isPayload(value)) {
-      payloads.push(key);
+      payloads.push({ key });
+    }
+    if (isPayload(base64Decoded)) {
+      payloads.push({ key, isBase64: true });
     }
   }
 
@@ -38,10 +41,14 @@ const createSafeRequests = (pocURL, replacements) => {
     return false;
   }
 
-  const [ payloadIncludedKey ] = payloads;
+  const [ { key: payloadIncludedKey, isBase64 } ] = payloads;
   const values = [];
   for (let value of pocURL.searchParams.getAll(payloadIncludedKey)) {
-    if (!isPayload(value)) {
+    const base64Decoded = new Buffer(value, 'base64').toString();
+    if (
+      (!isBase64 && !isPayload(value)) ||
+      (isBase64 && !isPayload(base64Decoded))
+    ) {
       values.push(value);
     }
   }
@@ -49,12 +56,14 @@ const createSafeRequests = (pocURL, replacements) => {
   // replace payload to replacement
   // payloadIncludedKey may have paired with other values
   return replacements.map(r => {
+    r = r.toString();
     const newURL = new url.URL(pocURL);
+    const base64R = new Buffer(r).toString('base64');
     newURL.searchParams.delete(payloadIncludedKey);
     for (let value of values) {
       newURL.searchParams.append(payloadIncludedKey, value);
     }
-    newURL.searchParams.append(payloadIncludedKey, r);
+    newURL.searchParams.append(payloadIncludedKey, isBase64 ? base64R : r);
     return newURL;
   });
 };
