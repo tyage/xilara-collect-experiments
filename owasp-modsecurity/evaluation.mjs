@@ -64,13 +64,8 @@ const isRequestPasses = async (uri) => {
   newURI.protocol = 'http';
   newURI.host = modSecurityServerHost;
   newURI.port = modSecurityServerPort;
-  try {
-    await fetch(newURI);
-    return true;
-  } catch(e) {
-    console.log(e);
-    return false;
-  }
+   const result = await fetch(newURI);
+   return !result.includes('<title>403 Forbidden</title>');
 };
 const analyzeTemplateMatchingResult = async () => {
   const responsesDir = `${dataDir}/responses`;
@@ -144,7 +139,7 @@ const analyzeTemplateMatchingResult = async () => {
 
     let passPoC = false;
     for (let req of [ poc ]) {
-      const result = !(await isRequestPasses(req));
+      const result = await isRequestPasses(req);
       // result should not be true
       console.log(req.toString(), result);
       if (result) {
@@ -157,6 +152,8 @@ const analyzeTemplateMatchingResult = async () => {
 
     if (!missBlocked && !verificationMissBlocked && !passPoC) {
       ++correctReports;
+    } else {
+      console.log(`something wrong with report ${report}`);
     }
   }
 
