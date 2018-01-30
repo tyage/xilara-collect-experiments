@@ -107,7 +107,7 @@ ${safeRequests.join('\n')}
 =====
 `;
       for (let i in safeRequests) {
-        buffer += await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
+        buffer += await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`) || '';
         await sleep(1000);
       }
       ++payloadFoundReports;
