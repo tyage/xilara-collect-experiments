@@ -1,7 +1,7 @@
 import fs from 'fs';
 import url from 'url';
 import cheerio from 'cheerio';
-import { listFiles, fetch } from '../lib';
+import { listFiles, fetch, sleep } from '../lib';
 
 const reportDir = 'data/openbugbounty/reports';
 const responsesDir = 'data/openbugbounty/responses';
@@ -105,6 +105,7 @@ const collectSafeResponses = async () => {
       console.log('=====');
       for (let i in safeRequests) {
         await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
+        await sleep(1);
       }
       ++payloadFoundReports;
     } catch(e) {
