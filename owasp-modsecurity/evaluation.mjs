@@ -4,8 +4,8 @@ import cheerio from 'cheerio';
 import { fetch } from '../xss-db/lib.mjs';
 
 const dataDir = 'xss-db/data/openbugbounty';
-const modSecurityServerHost = '10.228.76.209';
-const modSecurityServerPort = 80;
+const modSecurityServerHost = process.env.TARGET_HOST;
+const modSecurityServerPort = process.env.TARGET_PORT;
 
 const payloadPatterns = [
   /(['"]?[^>]*>)*<[^>]+>[^<]*(alert|confirm|prompt)[^<]*<\/[^>]+>/ig,
