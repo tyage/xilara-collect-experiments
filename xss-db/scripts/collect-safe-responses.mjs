@@ -74,7 +74,7 @@ const saveResponse = async (url, filename) => {
     const response = await fetch(url);
     fs.writeFileSync(filename, response);
   } catch (e) {
-    console.log(e);
+    return e;
   }
 };
 
@@ -85,36 +85,58 @@ const collectSafeResponses = async () => {
   let errorReports = 0;
 
   const safeParams = [ 1, 2, 3, 4, 5 ].map(i => i.toString()); // replace payload with 1 - 5
-  for (let report of validReports) {
+
+  const collectSafeResponsesForReport = async (report) => {
     const responseDir = `${responsesDir}/${report}`;
     fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
+
+    let buffer = '';
 
     try {
       const poc = getPoC(report);
       const safeRequests = createSafeRequests(poc, safeParams);
       if (!safeRequests) {
         ++payloadNotFoundReports;
-        continue;
+        return;
       }
 
-      console.log('=====');
-      console.log(poc.toString());
-      console.log('= replaced to =>');
-      console.log(safeRequests.join('\n'));
-      console.log('=====');
+      buffer += `=====
+${poc.toString()}
+= replaced to =>
+${safeRequests.join('\n')}
+=====
+`;
       for (let i in safeRequests) {
-        await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
-        await sleep(1);
+        buffer += await saveResponse(safeRequests[i], `${responseDir}/${safeParams[i]}`);
+        await sleep(1000);
       }
       ++payloadFoundReports;
     } catch(e) {
       ++errorReports;
-      console.log(e)
+      buffer += e;
     }
-  }
+    console.log(buffer);
+  };
 
-  console.log(`payload found in: ${payloadFoundReports} reports`);
-  console.log(`payload not found in: ${payloadNotFoundReports} reports`);
-  console.log(`error occured in: ${errorReports} reports`);
+  // 10分割して並列に実行
+  const groupedReports = [];
+  validReports.forEach((r, i) => {
+    const num = i % 10;
+    if (!groupedReports[num]) {
+      groupedReports[num] = [];
+    }
+    groupedReports[num].push(r);
+  });
+
+  Promise.all(groupedReports.map((reports, i) => new Promise(async (resolve) => {
+    for (let report of reports) {
+      await collectSafeResponsesForReport(report);
+    }
+    resolve();
+  }))).then(() => {
+    console.log(`payload found in: ${payloadFoundReports} reports`);
+    console.log(`payload not found in: ${payloadNotFoundReports} reports`);
+    console.log(`error occured in: ${errorReports} reports`);
+  });
 };
 collectSafeResponses();
