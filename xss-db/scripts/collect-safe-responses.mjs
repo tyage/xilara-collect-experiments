@@ -11,8 +11,9 @@ const payloadPatterns = [
 ];
 const isPayload = (param) => {
   let isMatched = false;
+  const base64Decoded = new Buffer(param, 'base64').toString();
   for (let pattern of payloadPatterns) {
-    if (param.match(pattern)) {
+    if (param.match(pattern) || base64Decoded.match(pattern)) {
       isMatched = true;
     }
   }
