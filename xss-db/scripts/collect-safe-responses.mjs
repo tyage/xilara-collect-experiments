@@ -85,7 +85,7 @@ const collectSafeResponses = async () => {
   let payloadNotFoundReports = 0;
   let errorReports = 0;
 
-  const safeParams = [ 1, 2, 3 ]; // replace payload with 1, 2 and 3
+  const safeParams = [ 1, 2, 3, 4, 5 ]; // replace payload with 1 - 5
   for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
     fs.existsSync(responseDir) || fs.mkdirSync(responseDir);
