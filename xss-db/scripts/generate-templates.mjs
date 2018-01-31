@@ -58,6 +58,7 @@ const createTemplate = async (report, preference, safeResponses, timeLimit = 20)
 };
 
 const createAllTemplate = async () => {
+  const baseResponses = [1, 2, 3];
   const preference = `${process.cwd()}/preferences.xml`;
   const responsesDir = `${process.cwd()}/data/openbugbounty/responses`;
   const validReports = JSON.parse(fs.readFileSync('data/openbugbounty/valid-reports.json'));
@@ -70,7 +71,7 @@ const createAllTemplate = async () => {
       continue;
     }
 
-    const safeResponses = [1, 2].map(id => `${responseDir}/${id}`);
+    const safeResponses = baseResponses.map(id => `${responseDir}/${id}`);
     const allExists = safeResponses.filter(r => fs.existsSync(r)).length === safeResponses.length;
     if (!allExists) {
       continue;
