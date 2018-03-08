@@ -85,16 +85,16 @@ const analyzeTemplateMatchingResult = async () => {
   let missBlockedReports = 0;
   let verificationMissBlockedReports = 0;
   let passPoCReports = 0;
+  let blockedSafeResponses = 0;
 
   for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
-    const roadrunnerFile = `${dataDir}/templates/${report}`;
-    const baseResponses = [1, 2].map(id => `${responseDir}/${id}`);
-    const safeVerificationResponses = [3].map(id => `${responseDir}/${id}`);
+    const baseResponses = [1, 2, 3, 4].map(id => `${responseDir}/${id}`);
+    const safeVerificationResponses = [5].map(id => `${responseDir}/${id}`);
     const pocResponses = ['poc'].map(id => `${responseDir}/${id}`);
 
     let allFilesExist = true;
-    for (let file of [ roadrunnerFile, ...baseResponses, ...safeVerificationResponses, ...pocResponses ]) {
+    for (let file of [ ...baseResponses, ...safeVerificationResponses, ...pocResponses ]) {
       if (!fs.existsSync(file)) {
         allFilesExist = false;
         break;
@@ -106,7 +106,7 @@ const analyzeTemplateMatchingResult = async () => {
 
     // XXX: template for these reports are broken because it includes CDATA in CDATA
     // XXX: fix the problem
-    if ([113850, 219900, 243710, 248640, 262540, 265520, 92930].includes(+report)) {
+    if ([113850, 137710, 219900, 232070, 243710, 248640, 262540, 265520, 92930].includes(+report)) {
       continue;
     }
 
@@ -114,8 +114,8 @@ const analyzeTemplateMatchingResult = async () => {
 
     console.log(`===== start report ${report}`);
 
-    const safeParams = [ 1, 2 ]; // replace payload with 1, 2
-    const verificationParams = [ 3 ]; // replace payload with 3
+    const safeParams = [ 1, 2, 3, 4 ]; // replace payload with 1, 2
+    const verificationParams = [ 5 ]; // replace payload with 3
     const poc = getPoC(report);
     const safeRequests = createSafeRequests(poc, safeParams);
     const verificationRequests = createSafeRequests(poc, verificationParams);
@@ -127,6 +127,7 @@ const analyzeTemplateMatchingResult = async () => {
       console.log(req.toString(), result);
       if (!result) {
         missBlocked = true;
+        ++blockedSafeResponses;
       }
     }
     if (missBlocked) {
@@ -140,6 +141,7 @@ const analyzeTemplateMatchingResult = async () => {
       console.log(req.toString(), result);
       if (!result) {
         verificationMissBlocked = true;
+        ++blockedSafeResponses;
       }
     }
     if (verificationMissBlocked) {
@@ -172,6 +174,7 @@ all reports: ${allReports}
 # of reports which safe responses blocked: ${missBlockedReports}
 # of reports which verification safe responses blocked: ${verificationMissBlockedReports}
 # of reports which poc passes: ${passPoCReports}
+# of safe responses which was blocked: ${blockedSafeResponses}
 `);
 };
 analyzeTemplateMatchingResult();

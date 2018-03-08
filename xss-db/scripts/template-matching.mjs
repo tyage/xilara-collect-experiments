@@ -13,17 +13,20 @@ const analyzeTemplateMatchingResult = async () => {
   let missBlockedReports = 0;
   let verificationMissBlockedReports = 0;
   let passPoCReports = 0;
+  let blockedSafeResponses = 0;
 
   for (let report of validReports) {
     const responseDir = `${responsesDir}/${report}`;
     const roadrunnerFile = `data/openbugbounty/templates/${report}`;
 
-    const baseResponses = [1, 2].map(id => `${responseDir}/${id}`);
-    const safeVerificationResponses = [3].map(id => `${responseDir}/${id}`);
+    const baseResponses = [1, 2, 3, 4].map(id => `${responseDir}/${id}`);
+    const safeVerificationResponses = [5].map(id => `${responseDir}/${id}`);
+    const otherResponses = [].map(id => `${responseDir}/${id}`);
     const pocResponses = ['poc'].map(id => `${responseDir}/${id}`);
 
     let allFilesExist = true;
-    for (let file of [ roadrunnerFile, ...baseResponses, ...safeVerificationResponses, ...pocResponses ]) {
+    for (let file of [ roadrunnerFile, ...baseResponses, ...safeVerificationResponses,
+      ...otherResponses, ...pocResponses ]) {
       if (!fs.existsSync(file)) {
         allFilesExist = false;
         break;
@@ -35,7 +38,10 @@ const analyzeTemplateMatchingResult = async () => {
 
     // XXX: template for these reports are broken because it includes CDATA in CDATA
     // XXX: fix the problem
-    if ([113850, 219900, 243710, 248640, 262540, 265520, 92930].includes(+report)) {
+    // 137710: invalid character in entity name(&がある)
+    // 232070: Invalid character in tag name
+    // もしかして, textを出さなければいけるのでは？
+    if ([113850, 137710, 219900, 232070, 243710, 248640, 262540, 265520, 92930].includes(+report)) {
       continue
     }
 
@@ -56,6 +62,7 @@ const analyzeTemplateMatchingResult = async () => {
       console.log(html, result);
       if (!result) {
         missBlocked = true;
+        ++blockedSafeResponses;
       }
     }
     if (missBlocked) {
@@ -70,6 +77,7 @@ const analyzeTemplateMatchingResult = async () => {
       console.log(html, result);
       if (!result) {
         verificationMissBlocked = true;
+        ++blockedSafeResponses;
       }
     }
     if (verificationMissBlocked) {
@@ -101,6 +109,7 @@ all reports: ${allReports}
 # of reports which safe responses blocked: ${missBlockedReports}
 # of reports which verification safe responses blocked: ${verificationMissBlockedReports}
 # of reports which poc passes: ${passPoCReports}
+# of safe responses which was blocked: ${blockedSafeResponses}
 `);
 };
 analyzeTemplateMatchingResult();
